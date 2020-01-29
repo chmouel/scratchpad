@@ -19,7 +19,7 @@ word=$(randomword)
 branch=pull-branch-${word}
 git checkout -b $branch master
 
-echo $word > html/random.txt
+echo $word > ci
 
 cat > ${TMP} <<EOF
 Add random word $word
@@ -30,8 +30,8 @@ $word
 EOF
 
 
-git add html/random.txt
-git commit -F ${TMP} html/random.txt
+git add ci
+git commit -F ${TMP} ci
 
 hub pull-request -F ${TMP} -p -b master -l random
 
