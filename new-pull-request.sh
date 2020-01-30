@@ -5,6 +5,7 @@ TMP=$(mktemp /tmp/.mm.XXXXXX)
 clean() { rm -f ${TMP}; }
 trap clean EXIT
 
+git checkout master
 git branch -l|grep pull-branch|xargs -n1 git branch -D
 
 randomword () {
