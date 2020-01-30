@@ -22,7 +22,7 @@ git checkout -b $branch master
 echo $word > ci
 
 cat > ${TMP} <<EOF
-Add random word $word
+[TEST] OpenShift Pipeline CI: $word
 
 We used to think that bird is the word but the best word in the world is
 $word
