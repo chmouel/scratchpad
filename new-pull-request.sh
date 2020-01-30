@@ -41,6 +41,8 @@ cat > ${TMP} <<EOF
 [TEST] OpenShift Pipeline CI
 
 ![a funny gif, while you wait](${randomgif})
+
+Word of the day is ${word}
 EOF
 
 
