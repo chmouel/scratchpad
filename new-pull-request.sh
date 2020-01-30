@@ -33,6 +33,6 @@ EOF
 git add ci
 git commit -F ${TMP} ci
 
-hub pull-request -F ${TMP} -p -b master -l random
+hub pull-request -F ${TMP} -p -b master -l CI
 
 git checkout master
