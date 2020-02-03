@@ -5,6 +5,9 @@ clean() { rm -f ${TMP}; }
 trap clean EXIT
 dt=$(date "+%Y%m%d-%Hh%MS%S")
 
+[[ -x ./close-all-pr.py ]] && ./close-all-pr.py
+
+
 git checkout master
 git branch -l|grep pull-branch|xargs -n1 git branch -D
 
