@@ -5,6 +5,7 @@ clean() { rm -f ${TMP}; }
 trap clean EXIT
 dt=$(date "+%Y%m%d-%Hh%MS%S")
 PR_AUTO_CLOSE=${PR_AUTO_CLOSE:-}
+env
 
 interactivestuff=
 while getopts "a" o; do
