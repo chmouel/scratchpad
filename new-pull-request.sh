@@ -45,6 +45,6 @@ EOF
 git add CI
 git commit -F ${TMP} CI
 
-hub pull-request -F ${TMP} -p -b master -l CI
+echo hub pull-request -F ${TMP} -p -b master -l CI
 
 git checkout master
