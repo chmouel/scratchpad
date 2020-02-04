@@ -5,7 +5,16 @@ clean() { rm -f ${TMP}; }
 trap clean EXIT
 dt=$(date "+%Y%m%d-%Hh%MS%S")
 PR_AUTO_CLOSE=${PR_AUTO_CLOSE:-}
-env
+
+if [[ ! -f ~/.config/hub && -n ${GITHUB_USER} && -n ${GITHUB_TOKEN} ]];then
+    mkdir -p ~/.config
+    cat <<EOF>~/.config/hub
+github.com:
+- user: ${GITHUB_USER}
+  oauth_token: ${GITHUB_TOKEN}
+  protocol: https
+EOF
+fi
 
 interactivestuff=
 while getopts "a" o; do
