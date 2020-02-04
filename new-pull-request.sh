@@ -6,8 +6,7 @@ trap clean EXIT
 dt=$(date "+%Y%m%d-%Hh%MS%S")
 PR_AUTO_CLOSE=${PR_AUTO_CLOSE:-}
 
-interactivestuff=no
-
+interactivestuff=
 while getopts "a" o; do
     case "${o}" in
         a)
