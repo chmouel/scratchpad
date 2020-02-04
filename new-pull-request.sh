@@ -6,13 +6,29 @@ trap clean EXIT
 dt=$(date "+%Y%m%d-%Hh%MS%S")
 PR_AUTO_CLOSE=${PR_AUTO_CLOSE:-}
 
-[[ -n ${PR_AUTO_CLOSE} && -x ./close-all-pr.py ]] && ./close-all-pr.py
+interactivestuff=no
+
+while getopts "a" o; do
+    case "${o}" in
+        a)
+            interactivestuff=yes
+            ;;
+        *)
+            echo "Invalid option"; exit 1;
+            ;;
+    esac
+done
+shift $((OPTIND-1))
 
 python=python3
 [[ -x /usr/libexec/platform-python ]] && python=/usr/libexec/platform-python
 
 git checkout master
-git branch -l|grep pull-branch|xargs -n1 git branch -D
+
+if [[ -n ${interactivestuff} ]];then
+    ./close-all-pr.py
+    git branch -l|grep pull-branch|xargs -n1 git branch -D || true
+fi
 
 branch=pull-branch-${dt}
 git checkout -b $branch master
