@@ -4,8 +4,9 @@ TMP=$(mktemp /tmp/.mm.XXXXXX)
 clean() { rm -f ${TMP}; }
 trap clean EXIT
 dt=$(date "+%Y%m%d-%Hh%MS%S")
+PR_AUTO_CLOSE=${PR_AUTO_CLOSE:-}
 
-[[ -x ./close-all-pr.py ]] && ./close-all-pr.py
+[[ -n ${PR_AUTO_CLOSE} && -x ./close-all-pr.py ]] && ./close-all-pr.py
 
 python=python3
 [[ -x /usr/libexec/platform-python ]] && python=/usr/libexec/platform-python
