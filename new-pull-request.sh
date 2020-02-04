@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -eux
 TMP=$(mktemp /tmp/.mm.XXXXXX)
 clean() { rm -f ${TMP}; }
 trap clean EXIT
