@@ -16,6 +16,9 @@ github.com:
 EOF
 fi
 
+git config --get user.name >/dev/null || git config user.name meow
+git config --get user.email >/dev/null || git config user.email thecat@openshift.dev 
+
 interactivestuff=
 while getopts "a" o; do
     case "${o}" in
