@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-
+	var blahBlah
 	http.HandleFunc("/", ExampleHandler)
 
 	port := os.Getenv("PORT")
