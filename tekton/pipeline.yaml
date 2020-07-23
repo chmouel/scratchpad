@@ -26,6 +26,8 @@ spec:
       taskRef:
         name: golangci-lint
       params:
+        - name: package
+          value: "."
         - name: flags
           value: "-v --timeout 10m"
         - name: version
