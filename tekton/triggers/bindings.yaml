@@ -1,0 +1,11 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: scratchpad-trigger-bindings
+spec:
+  params:
+    - name: revision
+      value: $(body.pull_request.head.sha)
+    - name: repo_url
+      value: $(body.repository.html_url)
