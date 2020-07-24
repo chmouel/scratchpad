@@ -6,6 +6,17 @@ metadata:
 spec:
   serviceAccountName: tekton-triggers-github-sa
   triggers:
+    # - name: github-listener
+    #   interceptors:
+    #     - github:
+    #         eventTypes:
+    #           - pull_request
+    #     - cel:
+    #         filter: "body.action in ['opened', 'synchronize', 'reopened']"
+    #   bindings:
+    #     - ref: scratchpad-trigger-bindings
+    #   template:
+    #     name: scratchpad-trigger-template
     - name: github-listener
       interceptors:
         - github:
@@ -14,6 +25,6 @@ spec:
         - cel:
             filter: "body.action in ['opened', 'synchronize', 'reopened']"
       bindings:
-        - ref: scratchpad-trigger-bindings
+        - ref: check-for-tekton-change
       template:
-        name: scratchpad-trigger-template
+        name: check-for-tekton-change
