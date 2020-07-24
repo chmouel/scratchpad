@@ -1,4 +1,8 @@
 #!/bin/bash
+SERVICE=el-scratchpad-listener-interceptor
+HOSTNAME=webhook-scratchpad.apps.chmouel.devcluster.openshift.com
+
+
 while getopts "r" o; do
     case "${o}" in
         r)
@@ -54,12 +58,9 @@ function create_secret() {
     kubectl get secret ${s} >/dev/null 2>/dev/null || kubectl create secret generic ${s} --from-literal ${literal}
 }
 
-service=el-scratchpad-listener-interceptor
-hostname=webhook-scratchpad.apps.chmouel.devcluster.openshift.com
-
 k pipeline.yaml
 k triggers/*yaml
 k tasks/*yaml
-waitfor service/${service}
-openshift_expose_service ${service} ${hostname}
+waitfor service/${SERVICE}
+openshift_expose_service ${SERVICE} ${HOSTNAME}
 create_secret github "token=$(git config --get github.oauth-token)"
