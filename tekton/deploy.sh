@@ -47,6 +47,13 @@ function openshift_expose_service () {
         echo "https://$(oc get route ${s} -o jsonpath='{.spec.host}')"
 }
 
+function create_secret() {
+    local s=${1}
+    local literal=${2}
+    [[ -n ${recreate} ]] && kubectl delete secret ${s}
+    kubectl get secret ${s} >/dev/null 2>/dev/null || kubectl create secret generic ${s} --from-literal ${literal}
+}
+
 service=el-scratchpad-listener-interceptor
 hostname=webhook-scratchpad.apps.chmouel.devcluster.openshift.com
 
@@ -55,3 +62,4 @@ k triggers/*yaml
 k tasks/*yaml
 waitfor service/${service}
 openshift_expose_service ${service} ${hostname}
+create_secret github "token=$(git config --get github.oauth-token)"
