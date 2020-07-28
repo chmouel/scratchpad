@@ -1,7 +1,7 @@
 #!/bin/bash
 SERVICE=el-scratchpad-listener-interceptor
 HOSTNAME=webhook-scratchpad.apps.chmouel.devcluster.openshift.com
-
+set -ex
 
 while getopts "r" o; do
     case "${o}" in
@@ -61,6 +61,14 @@ function create_secret() {
 k pipeline.yaml
 k triggers/*yaml
 k tasks/*yaml
+for i in tasks/*/;do
+    [[ -d $i ]] || continue # whateva
+    pushd ${i} && {
+		# https://blog.chmouel.com/2020/07/28/tekton-yaml-templates-and-script-feature/
+		~/GIT/perso/chmouzies/work/tekton-script-template.sh ${i}
+    } && popd
+done
+
 waitfor service/${SERVICE}
 openshift_expose_service ${SERVICE} ${HOSTNAME}
 create_secret github "token=$(git config --get github.oauth-token)"
