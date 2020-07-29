@@ -193,31 +193,35 @@ def main():
     status = regexp.findall(describe_output)[0].strip().split(" ")[-1]
     print(describe_output)
 
-    comment = {
-        "body":
-        f"""CI has {status}
+    post_command = json.loads(
+        gh_request(
+            "POST",
+            api_url.replace("/pulls/", "/issues/") + "/comments",
+            body={
+                "body":
+                f"""CI has **{status}**
 
 <details>
 <summary>PipelineRun Output</summary>
+
+```
 {output}
+```
 </details>
 
-<summary>..PipelineRun status..</summary>
+<details>
+<summary>PipelineRun status</summary>
+
+```
 {describe_output}
+```
 </details>
 
 
 
 """
-    }
-    post_command = json.loads(
-        gh_request(
-            "POST",
-            api_url.replace("/pulls/", "/issues/") + "/comments",
-            body=json.dumps(comment),
+            },
         ).read())
-    from pprint import pprint as p
-    p(post_command)
 
     if status == "Failed":
         sys.exit(1)
