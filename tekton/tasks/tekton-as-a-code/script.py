@@ -49,9 +49,8 @@ def execute(command, check_error=""):
 
 
 # https://stackoverflow.com/a/18422264
-def stream(command, check_error=""):
+def stream(command, filename, check_error=""):
     """Stream command"""
-    filename = 'test.log'
     with io.open(filename, 'wb') as writer, io.open(filename, 'rb',
                                                     1) as reader:
         try:
@@ -86,6 +85,7 @@ def gh_request(method, url, body=None):
 
 
 def parse_pr_results(jeez):
+    """Parse the Json results of """
     return {
         "repo_full_name": jeez["repository"]["full_name"],
         "repo_owner_login": jeez["repository"]["owner"]["login"],
@@ -127,8 +127,9 @@ def main():
     pull_request_json = json.loads("""$(params.github_json)""")
     prdico = parse_pr_results(pull_request_json)
 
-    url = f"https://{GITHUB_HOST_URL}/repos/{prdico['repo_full_name']}/pulls/{prdico['pull_request_number']}/files"
-    files_of_pull_request_json = json.loads(gh_request("GET", url).read())
+    api_url = f"https://{GITHUB_HOST_URL}/repos/{prdico['repo_full_name']}/pulls/{prdico['pull_request_number']}"
+    files_of_pull_request_json = json.loads(
+        gh_request("GET", f"{api_url}/files").read())
     # TESTING
     # files_of_pull_request_json = json.load(open("f.json"))
     for pr_file in files_of_pull_request_json:
@@ -178,8 +179,10 @@ def main():
 
     time.sleep(2)
 
-    stream(f"tkn pr logs -n {namespace} --follow --last",
+    output_file = tempfile.NamedTemporaryFile(delete=False).name
+    stream(f"tkn pr logs -n {namespace} --follow --last", output_file,
            f"Cannot show Pipelinerun log in {namespace}")
+    output = open(output_file).read()
 
     # Need a better way!
     describe_output = execute(
@@ -189,6 +192,33 @@ def main():
         re.MULTILINE)
     status = regexp.findall(describe_output)[0].strip().split(" ")[-1]
     print(describe_output)
+
+    comment = {
+        "body":
+        f"""CI has {status}
+
+<details>
+<summary>PipelineRun Output</summary>
+{output}
+</details>
+
+<summary>..PipelineRun status..</summary>
+{describe_output}
+</details>
+
+
+
+"""
+    }
+    post_command = json.loads(
+        gh_request(
+            "POST",
+            api_url.replace("/pulls/", "/issues/") + "/comments",
+            body=json.dumps(comment),
+        ).read())
+    from pprint import pprint as p
+    p(post_command)
+
     if status == "Failed":
         sys.exit(1)
 
