@@ -11,6 +11,8 @@ spec:
       value: {{repo_html_url}}
     - name: revision
       value: {{pull_request_head_ref}}
+    - name: golangci-flags
+      value: "-v --timeout 15m --disable errcheck"
   workspaces:
   - name: source
     volumeClaimTemplate:
