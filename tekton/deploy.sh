@@ -1,6 +1,6 @@
 #!/bin/bash
-SERVICE=el-scratchpad-listener-interceptor
-HOSTNAME=webhook-scratchpad.apps.chmouel.devcluster.openshift.com
+SERVICE=el-tknaac-listener-interceptor
+HOSTNAME=tektonic.apps.chmouel.devcluster.openshift.com
 TARGET_NAMESPACE=prcheck
 set -ex
 
@@ -35,12 +35,12 @@ function waitfor() {
     local cnt=0
     echo -n "Waiting for ${thing}: "
     while true;do
-        [[ ${i} == 60 ]] && {
+        [[ ${cnt} == 60 ]] && {
             echo "failed.. cannot wait any longer"
             exit 1
         }
         kubectl -n ${TARGET_NAMESPACE} get ${thing} 2>/dev/null && break
-        (( i++ ))
+        (( cnt++ ))
         echo -n "."
         sleep 10
     done
@@ -78,6 +78,5 @@ done
 
 create_secret github "token=$(git config --get github.oauth-token)"
 
-exit
 waitfor service/${SERVICE}
 openshift_expose_service ${SERVICE} ${HOSTNAME}
