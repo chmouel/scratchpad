@@ -1,10 +1,14 @@
 #!/bin/bash
 SERVICE=el-scratchpad-listener-interceptor
 HOSTNAME=webhook-scratchpad.apps.chmouel.devcluster.openshift.com
+TARGET_NAMESPACE=prcheck
 set -ex
 
-while getopts "r" o; do
+while getopts "rn:" o; do
     case "${o}" in
+        n)
+            TARGET_NAMESPACE=${OPTARG};
+            ;;
         r)
             recreate=yes
             ;;
@@ -15,12 +19,14 @@ while getopts "r" o; do
 done
 shift $((OPTIND-1))
 
+oc get project ${TARGET_NAMESPACE} >/dev/null 2>/dev/null || oc new-project ${TARGET_NAMESPACE}
+
 function k() {
     for file in $@;do
         [[ -n ${recreate} ]] && {
-            kubectl delete -f ${file}
+            kubectl -n ${TARGET_NAMESPACE} delete -f ${file}
         }
-        kubectl apply -f ${file}
+        kubectl -n ${TARGET_NAMESPACE} apply -f ${file}
     done
 }
 
@@ -33,7 +39,7 @@ function waitfor() {
             echo "failed.. cannot wait any longer"
             exit 1
         }
-        kubectl get ${thing} 2>/dev/null && break
+        kubectl -n ${TARGET_NAMESPACE} get ${thing} 2>/dev/null && break
         (( i++ ))
         echo -n "."
         sleep 10
@@ -55,7 +61,8 @@ function create_secret() {
     local s=${1}
     local literal=${2}
     [[ -n ${recreate} ]] && kubectl delete secret ${s}
-    kubectl get secret ${s} >/dev/null 2>/dev/null || kubectl create secret generic ${s} --from-literal ${literal}
+    kubectl -n ${TARGET_NAMESPACE} get secret ${s} >/dev/null 2>/dev/null || \
+        kubectl -n ${TARGET_NAMESPACE} create secret generic ${s} --from-literal ${literal}
 }
 
 k pipeline.yaml
@@ -69,6 +76,8 @@ for i in tasks/*/;do
     } && popd
 done
 
+create_secret github "token=$(git config --get github.oauth-token)"
+
+exit
 waitfor service/${SERVICE}
 openshift_expose_service ${SERVICE} ${HOSTNAME}
-create_secret github "token=$(git config --get github.oauth-token)"

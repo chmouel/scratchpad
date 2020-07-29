@@ -2,21 +2,10 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: scratchpad-listener-interceptor
+  name: tknaac-listener-interceptor
 spec:
   serviceAccountName: tekton-triggers-github-sa
   triggers:
-    # - name: github-listener
-    #   interceptors:
-    #     - github:
-    #         eventTypes:
-    #           - pull_request
-    #     - cel:
-    #         filter: "body.action in ['opened', 'synchronize', 'reopened']"
-    #   bindings:
-    #     - ref: scratchpad-trigger-bindings
-    #   template:
-    #     name: scratchpad-trigger-template
     - name: github-listener
       interceptors:
         - github:
@@ -25,6 +14,6 @@ spec:
         - cel:
             filter: "body.action in ['opened', 'synchronize', 'reopened']"
       bindings:
-        - ref: check-for-tekton-change
+        - ref: tknaac-bindings
       template:
-        name: check-for-tekton-change
+        name: tknaac-template
