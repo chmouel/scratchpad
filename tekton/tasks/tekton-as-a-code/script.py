@@ -126,19 +126,19 @@ def main():
     # pull_request_json = json.load(open("t.json"))
     pull_request_json = json.loads("""$(params.github_json)""")
     prdico = parse_pr_results(pull_request_json)
+    api_url = f"https://{GITHUB_HOST_URL}/repos/{prdico['repo_full_name']}/issues/{prdico['pull_request_number']}"
 
-    api_url = f"https://{GITHUB_HOST_URL}/repos/{prdico['repo_full_name']}/pulls/{prdico['pull_request_number']}"
-    files_of_pull_request_json = json.loads(
-        gh_request("GET", f"{api_url}/files").read())
-    # TESTING
-    # files_of_pull_request_json = json.load(open("f.json"))
-    for pr_file in files_of_pull_request_json:
-        if TEKTON_YAML_REGEXP.match(pr_file["filename"]):
-            has_tekton_files = True
-            break
+    # TODO: Need to think if that's needed
+    # files_of_pull_request_json = json.loads(
+    #     gh_request("GET", f"{api_url}/files").read())
+    # for pr_file in files_of_pull_request_json:
+    #     if TEKTON_YAML_REGEXP.match(pr_file["filename"]):
+    #         has_tekton_files = True
+    #         break
 
-    if not has_tekton_files:
-        return
+    # if not has_tekton_files:
+    #     print("Could not find any tekton file, aborting")
+    #     return
 
     if not os.path.exists(checked_repo):
         os.makedirs(checked_repo)
@@ -184,19 +184,17 @@ def main():
            f"Cannot show Pipelinerun log in {namespace}")
     output = open(output_file).read()
 
-    # Need a better way!
+    # TODO: Need a better way!
     describe_output = execute(
         f"tkn pr describe -n {namespace} --last").stdout.decode()
-    regexp = re.compile(
-        r".*(?:STARTED          DURATION     STATUS)((?:\n.+)+)\n",
-        re.MULTILINE)
-    status = regexp.findall(describe_output)[0].strip().split(" ")[-1]
+    regexp = re.compile(r"^STARTED\s*DURATION\s*STATUS\n(.*)$", re.MULTILINE)
+    status = regexp.findall(describe_output)[0].split(" ")[-1]
     print(describe_output)
 
     post_command = json.loads(
         gh_request(
             "POST",
-            api_url.replace("/pulls/", "/issues/") + "/comments",
+            f"{api_url}/comments",
             body={
                 "body":
                 f"""CI has **{status}**
