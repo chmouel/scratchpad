@@ -29,7 +29,7 @@ spec:
         - name: package
           value: "."
         - name: flags
-          value: "-v --timeout 15m"
+          value: "-v --timeout 15m --disable errcheck"
         - name: version
           value: v1.24.0
       workspaces:
