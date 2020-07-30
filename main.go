@@ -17,7 +17,10 @@ func main() {
 	}
 
 	log.Println("** Service Started on Port " + port + " **")
-	http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
