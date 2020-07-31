@@ -16,17 +16,11 @@ func main() {
 		port = "8080"
 	}
 
-	log.Println("** Service Started on Port " + port + " **")
-	err := http.ListenAndServe(":"+port, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("** Service %s Started on Port " + port + " **")
+	http.ListenAndServe(":"+port, nil)
 }
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-	_, err := io.WriteString(w, `{"status":"ok"}`)
-	if err != nil {
-		log.Fatal(err)
-	}
+	io.WriteString(w, `{"status":"ok"}`)
 }
