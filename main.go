@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -22,7 +21,6 @@ func main() {
 }
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("%s has percent s")
 	w.Header().Add("Content-Type", "application/json")
 	_, err := io.WriteString(w, `{"status":"ok"}`)
 	if err != nil {
