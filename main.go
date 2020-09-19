@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -17,7 +18,10 @@ func main() {
 	}
 
 	log.Println("** Service Started on Port " + port + " **")
-	http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		fmt.Printf(err)
+	}
 }
 
 func ExampleHandler(w http.ResponseWriter, r *http.Request) {
