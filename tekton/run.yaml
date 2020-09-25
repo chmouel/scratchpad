@@ -8,9 +8,9 @@ spec:
     name: scratchpad-pr
   params:
     - name: repo_url
-      value: {{repository.html_url}}
+      value: {{repo_url}}
     - name: revision
-      value: {{check_suite.head_sha}}
+      value: {{revision}}
   workspaces:
   - name: source
     volumeClaimTemplate:
