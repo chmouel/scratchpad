@@ -1,6 +1,8 @@
 // Chmouel Test
 package main
 
+// Blah
+
 import (
 	"io"
 	"log"
