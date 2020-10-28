@@ -1,4 +1,7 @@
 # OWNERS
+owners:
+  - "@openshift-pipelines"
+
 tasks:
   - https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.2/git-clone.yaml
   - pylint
