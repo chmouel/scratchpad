@@ -2,7 +2,3 @@ tasks:
   - https://raw.githubusercontent.com/tektoncd/catalog/master/task/git-clone/0.2/git-clone.yaml
   - pylint
   - golangci-lint:0.1
-
-files:
-  - pipeline.yaml
-  - run.yaml
