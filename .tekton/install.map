@@ -1,5 +1,0 @@
-# ORDER of installing all yaml files
-catalog://official:git-clone:0.1
-catalog://official:golangci-lint:0.1
-pipeline.yaml
-run.yaml
