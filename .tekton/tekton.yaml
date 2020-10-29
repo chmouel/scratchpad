@@ -1,3 +1,6 @@
+secrets:
+  - "codecov-secret"
+  
 owners:
   - "@openshift-pipelines"
 
