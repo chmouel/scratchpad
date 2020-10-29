@@ -1,3 +1,6 @@
+secrets:
+  - "chmouel-codecov-test"
+  
 owners:
   - "@openshift-pipelines"
 
