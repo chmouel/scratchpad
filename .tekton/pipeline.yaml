@@ -23,15 +23,30 @@ spec:
         workspace: source
     - name: lint
       runAfter: [fetch]
-      taskRef:
-        name: golangci-lint
+      taskSpec:
+        params:
+          - name: package
+          - name: flags
+          - name: version
+        workspaces:
+        - name: source
+        steps:
+          - name: lint
+            # we get bumped out when usingh the official image with docker.io
+            # ratelimit so workaround this.
+            image: registry.access.redhat.com/ubi8/go-toolset:1.14.12
+            workingdir: $(workspaces.source.path)
+            script: |
+              version=$(params.version)
+              curl -s -L -o- https://github.com/golangci/golangci-lint/releases/download/v${version}/golangci-lint-${version}-linux-amd64.tar.gz|tar xzf -  */golangci-lint --strip-components=1
+              ./golangci-lint run $(params.flags)
       params:
         - name: package
           value: "."
         - name: flags
           value: "-v --timeout 15m"
         - name: version
-          value: v1.24.0
+          value: 1.35.2
       workspaces:
         - name: source
           workspace: source
