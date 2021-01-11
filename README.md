@@ -1,6 +1,5 @@
 # Chmou's Playing ground
 
-
 <pre>
 In the dark, dark wood, There was a dark, dark house.
 
