@@ -4,49 +4,107 @@ kind: Pipeline
 metadata:
   name: scratchpad-pr
 spec:
-  params:
-    - name: repo_url
-    - name: revision
-  workspaces:
-  - name: source
   tasks:
-    - name: fetch
-      taskRef:
-        name: git-clone
-      params:
-        - name: url
-          value: $(params.repo_url)
-        - name: revision
-          value: $(params.revision)
-      workspaces:
-      - name: output
-        workspace: source
     - name: lint
-      runAfter: [fetch]
       taskSpec:
-        params:
-          - name: package
-          - name: flags
-          - name: version
-        workspaces:
-        - name: source
         steps:
-          - name: lint
-            # we get bumped out when usingh the official image with docker.io
-            # ratelimit so workaround this.
-            image: registry.access.redhat.com/ubi8/go-toolset:1.14.12
-            workingdir: $(workspaces.source.path)
+          - name: exit-1
+            image: registry.access.redhat.com/ubi8/ubi-minimal:8.2
+            script: "exit 1"
+  finally:
+    - name: finally
+      taskSpec:
+        steps:
+          - name: send-to-slack
+            env:
+              - name: SLACK_WEBHOOK_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: chmouel-scratchpad-slack-webhook
+                    key: hook_url
+              - name: PIPELINERUN
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.labels['tekton.dev/pipelineRun']
+            image: quay.io/chmouel/tekton-asa-code:latest
             script: |
-              version=$(params.version)
-              curl -s -L -o- https://github.com/golangci/golangci-lint/releases/download/v${version}/golangci-lint-${version}-linux-amd64.tar.gz|tar xzf -  */golangci-lint --strip-components=1
-              ./golangci-lint run $(params.flags)
-      params:
-        - name: package
-          value: "."
-        - name: flags
-          value: "-v --timeout 15m"
-        - name: version
-          value: 1.35.2
-      workspaces:
-        - name: source
-          workspace: source
+              #!/usr/bin/env python3
+              import subprocess
+              import sys
+              import json
+              import os
+              from urllib.request import Request, urlopen
+
+              image_failure_png = 'https://www.vhv.rs/dpng/d/415-4154815_grumpy-cat-png-photos-grumpy-cat-png-transparent.png'
+              image_success_png = 'https://github.com/tektoncd.png'
+
+              label_to_search = "nightly-ci"
+              labels = eval("""{{pull_request.labels}}""")
+              console_url = """{{openshift_console_pipelinerun_href}}"""
+              pull_request_url = """{{pull_request.html_url}}"""
+              print(console_url)
+              print(pull_request_url)
+
+              # Check if the PR has nightly CI
+              isnightly_ci = [x for x in labels if x['name'] == label_to_search]
+
+              if not isnightly_ci:
+                print("Not a nightly CI PR: skipping the reporting to slack")
+                sys.exit(0)
+
+              # Check the status of the pipelinerun
+              ret = subprocess.run(f"kubectl get pipelinerun {os.environ.get('PIPELINERUN', 'unkown')} -o json", shell=True, check=True, capture_output=True)
+              if ret.returncode != 0:
+                print("Error retrieving pipelinerun status")
+                sys.exit(1)
+              pr = json.loads(ret.stdout)
+              # The Running is safe here, because it's the finally task where we are at.
+              failed = []
+              taskRuns = pr['status']['taskRuns']
+              for task in taskRuns.keys():
+                if len([ x['message'] for x in taskRuns[task]['status']['conditions'] if x['status'] != 'Running' and x['status'] == 'False']) > 0:
+                  failed.append(task)
+
+              if failed:
+                subject = f"OpenShift Pipelines CI has failed on {pull_request_url} " \
+                    ":fb-sad: :crying_cat_face: :crying:"
+                image_url = image_failure_png
+                text = f"""• *Failed Tasks*: {", ".join(failed)}
+              • *PipelineRun logs*: {console_url}
+                """
+              else:
+                subject = f"OpenShift Pipelines CI ran succesfully on {pull_request_url} " \
+                    ":pipelinedance: :dancing-penguin: :yay2:"
+                image_url = image_success_png
+                text = f"""
+                  • *PipelineRun logs*: {console_url}
+                """
+
+              msg = {
+                  "text":
+                  subject,
+                  "attachments": [{
+                      "blocks": [
+                          {
+                              "type": "section",
+                              "text": {
+                                  "type": "mrkdwn",
+                                  "text": text,
+                              },
+                              "accessory": {
+                                  "type": "image",
+                                  "image_url": image_url,
+                                  "alt_text": "TektonCD CI"
+                              }
+                          },
+                      ]
+                  }]
+              }
+              req = Request(
+                  os.environ.get("SLACK_WEBHOOK_URL"),
+                  data=json.dumps(msg).encode(),
+                  headers={"Content-type": "application/json"},
+                  method="POST")
+              # TODO: Handle error?
+              print(urlopen(req).read().decode())
+              print("slack message has been sent")
