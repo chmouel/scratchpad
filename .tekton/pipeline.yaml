@@ -10,19 +10,7 @@ spec:
   workspaces:
   - name: source
   tasks:
-    - name: fetch
-      taskRef:
-        name: git-clone
-      params:
-        - name: url
-          value: $(params.repo_url)
-        - name: revision
-          value: $(params.revision)
-      workspaces:
-      - name: output
-        workspace: source
-    - name: lint
-      runAfter: [fetch]
+    - name: giggles
       taskSpec:
         params:
           - name: package
@@ -31,15 +19,13 @@ spec:
         workspaces:
         - name: source
         steps:
-          - name: lint
+          - name: giggle
             # we get bumped out when usingh the official image with docker.io
             # ratelimit so workaround this.
-            image: registry.access.redhat.com/ubi8/go-toolset:1.14.12
+            image: registry.redhat.io/ubi8/ubi-minimal
             workingdir: $(workspaces.source.path)
             script: |
-              version=$(params.version)
-              curl -s -L -o- https://github.com/golangci/golangci-lint/releases/download/v${version}/golangci-lint-${version}-linux-amd64.tar.gz|tar xzf -  */golangci-lint --strip-components=1
-              ./golangci-lint run $(params.flags)
+              echo "just for giggle"
       params:
         - name: package
           value: "."
