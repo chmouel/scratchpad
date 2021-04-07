@@ -1,6 +1,17 @@
 # Chmou's Playing ground
 
 <pre>
+The wind was a torrent of darkness among the gusty trees.   
+The moon was a ghostly galleon tossed upon cloudy seas.   
+The road was a ribbon of moonlight over the purple moor,   
+And the highwayman came riding—
+         Riding—riding—
+The highwayman came riding, up to the old inn-door.
+</pre>
+
+---
+
+<pre>
 In the dark, dark wood, There was a dark, dark house.
 
 And in the dark, dark house, there was a dark, dark room.
