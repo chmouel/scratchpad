@@ -86,8 +86,6 @@ spec:
   steps:
     - name: clone
       image: $(params.gitInitImage)
-      securityContext:
-        runAsUser: 65535
       script: |
         #!/bin/sh
         set -eu -o pipefail
