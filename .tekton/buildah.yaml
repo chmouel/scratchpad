@@ -22,6 +22,7 @@ spec:
   params:
   - name: IMAGE
     description: Reference of the image buildah will produce.
+    default: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(context.pipeline.name)
   - name: BUILDER_IMAGE
     description: The location of the buildah builder image.
     default: quay.io/buildah/stable:v1.17.0

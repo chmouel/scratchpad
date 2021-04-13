@@ -27,7 +27,10 @@ spec:
       runAfter: [lint]
       params:
         - name: IMAGE
-          value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/testing        
+          value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/testing      
+        - name: TLSVERIFY
+          value: "false"
+
       workspaces:
         - name: source          
           workspace: source
@@ -47,7 +50,6 @@ spec:
             image: registry.access.redhat.com/ubi8/go-toolset:1.14.12
             workingdir: $(workspaces.source.path)
             script: |
-              sleep 1000
               version=$(params.version)
               curl -s -L -o- https://github.com/golangci/golangci-lint/releases/download/v${version}/golangci-lint-${version}-linux-amd64.tar.gz|tar xzf -  */golangci-lint --strip-components=1
       params:
