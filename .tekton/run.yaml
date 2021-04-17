@@ -8,9 +8,9 @@ spec:
     name: scratchpad-pr
   params:
     - name: repo_url
-      value: {{repo_url}}
+      value: https://github.com/chmouel/scratchpad/
     - name: revision
-      value: {{revision}}
+      value: simple
   workspaces:
   - name: source
     volumeClaimTemplate:
