@@ -1,0 +1,58 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: log-itself
+spec:
+  tasks:
+    - name: task1
+      taskSpec:
+        steps:
+          - name: task1
+            # we get bumped out when usingh the official image with docker.io
+            # ratelimit so workaround this.
+            image: public.ecr.aws/bitnami/bitnami-shell:latest
+            script: |
+              curl -k "https://baconipsum.com/api/?type=all-meat&paras=3&start-with-lorem=1&format=text"
+  finally:
+    - name: finally-logs
+      params:
+        - name: pipelinerunName
+          value: "$(context.pipelineRun.name)"
+        - name: simpleUploaderUrl
+          value: "https://uploader-cron.svc.ci.openshift.org/upload"
+        - name: simpleUploaderPathPrefix
+          value: "/ci/pipelines-catalog"          
+          
+      taskSpec:
+        params:
+          - name: pipelinerunName
+          - name: simpleUploaderUrl
+          - name: simpleUploaderPathPrefix
+        steps:
+          - name: get-log
+            # we get bumped out when usingh the official image with docker.io
+            # ratelimit so workaround this.  
+            env:
+              - name: WEB_PROTECTED_USERNAME_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: "web-protected-creds"
+                    key: "username-password"
+            image: gcr.io/tekton-releases/dogfooding/test-runner:latest
+            script: |
+              WEB_PROTECTED_URL="$(params.simpleUploaderUrl)"
+              WEB_PROTECTED_PREFIX="$(params.simpleUploaderPathPrefix)"
+              fname="$(params.pipelinerunName)-$(date "+%d%m-%H").txt"
+              tkn pr logs "$(params.pipelinerunName)" > /tmp/${fname}
+              set +x
+              curl -o/dev/null -s -f -u "${WEB_PROTECTED_USERNAME_PASSWORD}" -F path=${WEB_PROTECTED_PREFIX}/${fname} -X POST \
+                 -F file="@/tmp/${fname}" ${WEB_PROTECTED_URL} || { echo "Error uploading to ${WEB_PROTECTED_URL}"; exit 1 ;}
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: log-itself-pr
+spec:
+  pipelineRef:
+    name: log-itself
