@@ -61,12 +61,35 @@ jobs:
       run: |
         kubectl wait --timeout=2m --for=condition=Ready nodes --all
 
+    - name: Install ambassador
+      run: |
+      	kubectl create ns ambassador && sleep 5
+        kubectl apply -f https://github.com/datawire/ambassador-operator/releases/latest/download/ambassador-operator-crds.yaml
+        kubectl apply -n ambassador -f https://github.com/datawire/ambassador-operator/releases/latest/download/ambassador-operator-kind.yaml 
+        kubectl wait --timeout=180s -n ambassador --for=condition=deployed ambassadorinstallations/ambassador
+
+    - name: Install Tekton
+      run: |
+        kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+        kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+        kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/interceptors.yaml
+        kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/tekton-dashboard-release.yaml
+        i=0
+        for tt in pipelines triggers;do
+          while true;do
+            [[ ${i} == 120 ]] && exit 1
+            ep=$(kubectl get ep -n tekton-pipelines tekton-${tt}-webhook -o jsonpath='{.subsets[*].addresses[*].ip}')
+            [[ -n ${ep} ]] && break
+            sleep 2
+            i=$((i+1))
+          done
+        done
     - name: Run Smoke Test
       run: |
         git clone  https://github.com/openshift-pipelines/pipelines-as-code/
         cd pipelines-as-code
         # Test with kind load
-        KO_DOCKER_REPO=kind.local ko apply --platform=all -f ./config
+        KO_DOCKER_REPO=kind.local ko apply -f ./config
 
     - name: Collect logs
       if: ${{ always() }}
