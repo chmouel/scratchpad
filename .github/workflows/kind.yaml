@@ -117,7 +117,7 @@ jobs:
       - name: Apply config with KO
         run: |
           # Test with kind load
-          KO_DOCKER_REPO=kind.local ko apply -f ./config
+          ko apply -f ./config
 
       - name: Create Ambassador Route
         run: |
