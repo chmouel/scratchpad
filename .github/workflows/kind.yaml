@@ -16,6 +16,7 @@ jobs:
       REGISTRY_NAME: registry.local
       REGISTRY_PORT: 5000
       KO_DOCKER_REPO: registry.local:5000/ko
+      EL_NAME: kind.pac
 
     steps:
       - uses: actions/setup-go@v2
@@ -104,6 +105,32 @@ jobs:
         run: |
           # Test with kind load
           KO_DOCKER_REPO=kind.local ko apply -f ./config
+
+      - name: Create Ambassador Route
+        run: |
+          sudo echo "127.0.0.1 $EL_NAME" | sudo tee -a /etc/hosts
+          cat <<EOF | kubectl apply -f-
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kind.pipelines.devcluster.openshift.com-ingress
+            namespace: pipelines-as-code
+            annotations:
+              kubernetes.io/ingress.class: "ambassador"
+          spec:
+            rules:
+            - host: "${EL_NAME}"
+              http:
+                paths:
+                - path: /
+                  pathType: Exact
+                  backend:
+                    service:
+                      name: el-pipelines-as-code-interceptor
+                      port:
+                        number: 8080
+          EOF
+          curl -Lv http://${EL_NAME}
 
       - name: Collect logs
         if: ${{ always() }}
