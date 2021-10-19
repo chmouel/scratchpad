@@ -27,6 +27,12 @@ jobs:
         with:
           repository: "openshift-pipelines/pipelines-as-code"
 
+      - name: "Install pysmee"
+        run: |
+          sudo apt -y install python3-pip
+          pip3 install pysmee
+          pysmee --forward ${{ secrets.SECRET_TOKEN }} http://${EL_NAME}
+
       - uses: actions/cache@v2
         with:
           path: |
@@ -90,7 +96,7 @@ jobs:
         run: |
           kubectl create ns ambassador && sleep 5
           kubectl apply -f https://github.com/datawire/ambassador-operator/releases/latest/download/ambassador-operator-crds.yaml
-          kubectl apply -n ambassador -f https://github.com/datawire/ambassador-operator/releases/latest/download/ambassador-operator-kind.yaml 
+          kubectl apply -n ambassador -f https://github.com/datawire/ambassador-operator/releases/latest/download/ambassador-operator-kind.yaml
           kubectl wait --timeout=180s -n ambassador --for=condition=deployed ambassadorinstallations/ambassador
 
       - name: Install Tekton
