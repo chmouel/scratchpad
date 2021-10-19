@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: chmouel/pipelines-as-code
-          branch: e2e-tests
+          ref: e2e-tests
       - uses: actions/cache@v2
         with:
           path: |
@@ -164,11 +164,14 @@ jobs:
 
       - name: Install and Run pysmee
         run: |
-          sudo apt -y install python3-pip
           pip3 install pysmee
           set -x
           nohup pysmee forward ${{ secrets.PYSMEE_URL }} http://${EL_NAME} &
 
+      - name: Run E2E Tests
+        run: |
+          sudo apt -y install make
+          make test-e2e
       - name: Collect logs
         if: ${{ always() }}
         run: |
