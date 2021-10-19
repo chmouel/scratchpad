@@ -27,13 +27,6 @@ jobs:
         with:
           repository: "openshift-pipelines/pipelines-as-code"
 
-      - name: "Install pysmee"
-        run: |
-          sudo apt -y install python3-pip
-          pip3 install pysmee
-          set -x
-          nohup pysmee forward ${{ secrets.PYSMEE_URL }} http://${EL_NAME} &
-
       - uses: actions/cache@v2
         with:
           path: |
@@ -155,6 +148,15 @@ jobs:
             curl -s --fail-early -L http://kind.pac/|grep -q pipelines-as-code && break
             sleep 2
           done
+
+      - name: Install and Run pysmee
+        run: |
+          sudo apt -y install python3-pip
+          pip3 install pysmee
+          set -x
+          nohup pysmee forward ${{ secrets.PYSMEE_URL }} http://${EL_NAME} &
+          sleep 120
+
       - name: Collect logs
         if: ${{ always() }}
         run: |
