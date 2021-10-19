@@ -17,13 +17,8 @@ jobs:
       REGISTRY_PORT: 5000
       KO_DOCKER_REPO: registry.local:5000/ko
       EL_NAME: kind.pac
-      TEST_GITHUB_API_URL: https://api.github.com/
-      TEST_GITHUB_TOKEN: ${{ secrets.GH_APP_TOKEN }}
       TEST_GITHUB_REPO_OWNER_GITHUBAPP: openshift-pipelines/pipelines-as-code-e2e-tests
       # TEST_GITHUB_REPO_OWNER_WEBHOOK: pac/pac-test-webhooks
-      TEST_EL_WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
-      TEST_GITHUB_REPO_INSTALLATION_ID: 12018293
-      TEST_EL_URL: kind.pac
 
     steps:
       - uses: actions/setup-go@v2
@@ -170,7 +165,15 @@ jobs:
 
       - name: Run E2E Tests
         run: |
-          sudo apt -y install make
+
+          export TEST_GITHUB_API_URL=api.github.com
+          export TEST_GITHUB_REPO_OWNER_GITHUBAPP=openshift-pipelines/pipelines-as-code-e2e-tests
+
+          export TEST_GITHUB_TOKEN="${{ secrets.GH_APPS_TOKEN }}"
+          export TEST_EL_WEBHOOK_SECRET="${{ secrets.WEBHOOK_SECRET }}"
+          export TEST_GITHUB_REPO_INSTALLATION_ID="${{ secrets.INSTALLATION_ID }}"
+          export TEST_EL_URL="${EL_NAME}"
+
           make test-e2e
       - name: Collect logs
         if: ${{ always() }}
