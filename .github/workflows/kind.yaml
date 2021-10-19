@@ -21,9 +21,19 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: 1.17.x
+
       - uses: actions/checkout@v2
         with:
           repository: "openshift-pipelines/pipelines-as-code"
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Install ko
         run: curl -sfL https://github.com/google/ko/releases/download/v0.9.3/ko_0.9.3_Linux_x86_64.tar.gz -o-|tar xvzf - -C /usr/local/bin ko
@@ -76,6 +86,9 @@ jobs:
           kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
           kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/interceptors.yaml
           kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/tekton-dashboard-release.yaml
+
+      - name: Wait for Tekton to be installed
+        run: |
           i=0
           for tt in pipelines triggers;do
             while true;do
@@ -86,6 +99,7 @@ jobs:
               i=$((i+1))
             done
           done
+
       - name: Apply config with KO
         run: |
           # Test with kind load
