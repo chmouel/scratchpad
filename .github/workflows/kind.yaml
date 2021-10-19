@@ -142,11 +142,12 @@ jobs:
                       port:
                         number: 8080
           EOF
-          kubectl get ingress --all-namespaces
-          curl -Lv http://${EL_NAME}
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      - name: Wait that the ingress host is up
+        run: |
+          for i in {1..60};do
+            curl -s --fail-early -L http://kind.pac/|grep -q pipelines-as-code && break
+            sleep 2
+          done
       - name: Collect logs
         if: ${{ always() }}
         run: |
