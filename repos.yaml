@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chmouel-scratchpad
+
+---
+apiVersion: "pipelinesascode.tekton.dev/v1alpha1"
+kind: Repository
+metadata:
+  name: chmouel-scratchpad
+  namespace: chmouel-scratchpad
+spec:
+  url: "https://github.com/chmouel/scratchpad"
+  git_provider:
+    secret:
+      name: "chmouel-scratchpad-secret"
+      key: "token"
+    webhook_secret:
+      name: "chmouel-scratchpad-secret"
+      key: "webhook"
