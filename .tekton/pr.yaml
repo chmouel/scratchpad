@@ -1,0 +1,18 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: pipeline
+  annotations:
+    pipelinesascode.tekton.dev/target-namespace: "pac-e2e-ns-wk5sx"
+    pipelinesascode.tekton.dev/on-target-branch: "[main]"
+    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+spec:
+  pipelineSpec:
+    tasks:
+      - name: task
+        taskSpec:
+          steps:
+            - name: task
+              image: registry.access.redhat.com/ubi8/ubi-micro:8.5
+              command: ["/bin/echo", "HELLOMOTO"]
