@@ -1,3 +1,5 @@
+# How to test easily if things works
+# gh release delete 0.5.6 -y;rm -f TOUCHME;git amend -a --no-edit && git tag --force 0.5.6 && goreleaser release --rm-dist
 env:
   - TARGET_BRANCH=FOFOFOOFOFO
   - TARGET_PAC_VERSION={{ .Tag }}
